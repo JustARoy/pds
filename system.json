@@ -1,0 +1,34 @@
+
+{
+  "id": "pds",
+  "name": "pds",
+  "title": "Pokemon Dark Shadows",
+  "description": "A System for playing Pokemon Dark Shadows",
+  "author": "Tim Eickenroth",
+  "version": 0.01,
+  "esmodules": ["module/simple.js"],
+  "styles": ["styles/simple.css"],
+  "packs": [],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    }
+  ],
+  "compatibility": {
+    "minimum": "10",
+    "verified": "11",
+    "maximum": "11"
+  },
+  "gridDistance": 1,
+  "gridUnits": "m",
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "stress",
+  "initiative": "1d100"
+}
