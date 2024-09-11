@@ -28,6 +28,6 @@ export class SimpleItem extends Item {
    * @type {boolean}
    */
   get isTemplate() {
-    return !!this.getFlag("pds", "isTemplate");
+    return !!this.getFlag("worldbuilding", "isTemplate");
   }
 }

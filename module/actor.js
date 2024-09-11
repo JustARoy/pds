@@ -9,124 +9,255 @@ export class SimpleActor extends Actor {
   /** @inheritdoc */
   prepareDerivedData() {
     super.prepareDerivedData();
-
-    const system = this.system
-
-    //if(system.type === "character"){
-
-
     this.system.groups = this.system.groups || {};
     this.system.attributes = this.system.attributes || {};
     EntitySheetHelper.clampResourceValues(this.system.attributes);
-    //const system = this.system;
+  }
 
-    //Calculate Level
-    system.level = Math.floor((system.xp - 180) / 30)
+  /* -------------------------------------------- */
 
-    //Calculate Charakterprogression Total Values
-    system.health.max = system.health.startValue + system.health.bought
-    system.healthThresholds.firstThreshold.value = system.healthThresholds.firstThreshold.startValue + system.healthThresholds.firstThreshold.bought
-    system.healthThresholds.secondThreshold.value = system.healthThresholds.secondThreshold.startValue + system.healthThresholds.secondThreshold.bought
-    system.healthThresholds.thirdThreshold.value = system.healthThresholds.thirdThreshold.startValue + system.healthThresholds.thirdThreshold.bought
-    system.healthThresholds.fourthThreshold.value = system.healthThresholds.fourthThreshold.startValue + system.healthThresholds.fourthThreshold.bought
-    system.stress.max = system.stress.startValue + system.stress.bought
-    system.armor.max = system.armor.startValue + system.armor.bought
-    system.skillsShop.total = system.skillsShop.startValue + system.skillsShop.bought
-    system.damage.total = system.damage.startValue + system.damage.bought
-    system.attributesShop.total = system.attributesShop.startValue + system.attributesShop.bought
-    system.luck.max = system.luck.startValue + system.luck.bought * 2
+  /** @override */
+  static async createDialog(data={}, options={}) {
+    return EntitySheetHelper.createDialog.call(this, data, options);
+  }
 
-    //calculate Charakterprogression Total Prices
-    system.health.priceTotal = system.health.bought * system.health.price
-    system.healthThresholds.firstThreshold.priceTotal = system.healthThresholds.firstThreshold.bought * system.healthThresholds.firstThreshold.price
-    system.healthThresholds.secondThreshold.priceTotal = system.healthThresholds.secondThreshold.bought * system.healthThresholds.secondThreshold.price
-    system.healthThresholds.thirdThreshold.priceTotal = system.healthThresholds.thirdThreshold.bought * system.healthThresholds.thirdThreshold.price
-    system.healthThresholds.fourthThreshold.priceTotal = system.healthThresholds.fourthThreshold.bought * system.healthThresholds.fourthThreshold.price
-    system.stress.priceTotal = system.stress.bought * system.stress.price
-    system.armor.priceTotal = system.armor.bought * system.armor.price
-    system.skillsShop.priceTotal = system.skillsShop.bought * system.skillsShop.price
-    system.damage.priceTotal = system.damage.bought * system.damage.price
-    system.attributesShop.priceTotal = system.attributesShop.bought * system.attributesShop.price
-    system.luck.priceTotal = system.luck.bought * system.luck.price
+  /* -------------------------------------------- */
 
-    //calculate Skills Base
-    //Body
-    system.skills.stamina.base = 20 + system.attributes.body.bought + system.skills.stamina.boni
-    system.skills.atletik.base = 20 + system.attributes.body.bought + system.skills.atletik.boni
-    system.skills.intimidateB.base = 20 + system.attributes.body.bought + system.skills.intimidateB.boni
-    system.skills.strength.base = 20 + system.attributes.body.bought + system.skills.strength.boni
-    system.skills.toughness.base = 20 + system.attributes.body.bought + system.skills.toughness.boni
-    //Dexterity
-    system.skills.acrobatic.base = 20 + system.attributes.dexterity.bought + system.skills.acrobatic.boni
-    system.skills.sleightOfHand.base = 20 + system.attributes.dexterity.bought + system.skills.sleightOfHand.boni
-    system.skills.infiltration.base = 20 + system.attributes.dexterity.bought + system.skills.infiltration.boni
-    system.skills.stealth.base = 20 + system.attributes.dexterity.bought + system.skills.stealth.boni
-    //Awareness
-    system.skills.intuition.base = 20 + system.attributes.awareness.value + system.skills.intuition.boni
-    system.skills.investigation.base = 20 + system.attributes.awareness.value + system.skills.investigation.boni
-    system.skills.perception.base = 20 + system.attributes.awareness.value + system.skills.perception.boni
-    system.skills.willpower.base = 20 + system.attributes.awareness.value + system.skills.willpower.boni
-    //Intelligenze
-    system.skills.generalEducation.base = 20 + system.attributes.intelligenze.value + system.skills.generalEducation.boni
-    system.skills.culturalEducation.base = 20 + system.attributes.intelligenze.value + system.skills.culturalEducation.boni
-    system.skills.technikEducation.base = 20 + system.attributes.intelligenze.value + system.skills.technikEducation.boni
-    system.skills.medizinEducation.base = 20 + system.attributes.intelligenze.value + system.skills.medizinEducation.boni
-    system.skills.pokemonEducation.base = 20 + system.attributes.intelligenze.value + system.skills.pokemonEducation.boni
-    system.skills.nature.base = 20 + system.attributes.intelligenze.value + system.skills.nature.boni
-    system.skills.occultEductaion.base = 20 + system.attributes.intelligenze.value + system.skills.occultEductaion.boni
-    //Charisma
-    system.skills.leadership.base = 20 + system.attributes.charisma.value + system.skills.leadership.boni
-    system.skills.performance.base = 20 + system.attributes.charisma.value + system.skills.performance.boni
-    system.skills.intimadateC.base = 20 + system.attributes.charisma.value + system.skills.intimadateC.boni
-    system.skills.deception.base = 20 + system.attributes.charisma.value + system.skills.deception.boni
-    system.skills.persuation.base = 20 + system.attributes.charisma.value + system.skills.persuation.boni
+  /**
+   * Is this Actor used as a template for other Actors?
+   * @type {boolean}
+   */
+  get isTemplate() {
+    return !!this.getFlag("worldbuilding", "isTemplate");
+  }
 
-    //calculate Skill Finalvalue
-    //Body
-    system.skills.stamina.finalvalue = system.skills.stamina.value + system.skills.stamina.base
-    system.skills.atletik.finalvalue = system.skills.atletik.value + system.skills.atletik.base
-    system.skills.intimidateB.finalvalue = system.skills.intimidateB.value + system.skills.intimidateB.base
-    system.skills.strength.finalvalue = system.skills.strength.value + system.skills.strength.base
-    system.skills.toughness.finalvalue = system.skills.toughness.value + system.skills.toughness.base
-    //Dexterity
-    system.skills.acrobatic.finalvalue = system.skills.acrobatic.value + system.skills.acrobatic.base
-    system.skills.sleightOfHand.finalvalue = system.skills.sleightOfHand.value + system.skills.sleightOfHand.base
-    system.skills.infiltration.finalvalue = system.skills.infiltration.value + system.skills.infiltration.base
-    system.skills.stealth.finalvalue = system.skills.stealth.value + system.skills.stealth.base
-    //Awareness
-    system.skills.intuition.finalvalue = system.skills.intuition.value + system.skills.intuition.base
-    system.skills.investigation.finalvalue = system.skills.investigation.value + system.skills.investigation.base
-    system.skills.perception.finalvalue = system.skills.perception.value + system.skills.perception.base
-    system.skills.willpower.finalvalue = system.skills.willpower.value + system.skills.willpower.base
-    //Intelligenze
-    system.skills.generalEducation.finalvalue = system.skills.generalEducation.value + system.skills.generalEducation.base
-    system.skills.culturalEducation.finalvalue = system.skills.culturalEducation.value + system.skills.culturalEducation.base
-    system.skills.technikEducation.finalvalue = system.skills.technikEducation.value + system.skills.technikEducation.base
-    system.skills.medizinEducation.finalvalue = system.skills.medizinEducation.value + system.skills.medizinEducation.base
-    system.skills.pokemonEducation.finalvalue = system.skills.pokemonEducation.value + system.skills.pokemonEducation.base
-    system.skills.nature.finalvalue = system.skills.nature.value + system.skills.nature.base
-    system.skills.occultEductaion.finalvalue = system.skills.occultEductaion.value + system.skills.occultEductaion.base
-    //Charisma
-    system.skills.leadership.finalvalue = system.skills.leadership.value + system.skills.leadership.base
-    system.skills.performance.finalvalue = system.skills.performance.value + system.skills.performance.base
-    system.skills.intimadateC.finalvalue = system.skills.intimadateC.value + system.skills.intimadateC.base
-    system.skills.deception.finalvalue = system.skills.deception.value + system.skills.deception.base
-    system.skills.persuation.finalvalue = system.skills.persuation.value + system.skills.persuation.base
+  /* -------------------------------------------- */
+  /*  Roll Data Preparation                       */
+  /* -------------------------------------------- */
 
+  /** @inheritdoc */
+  getRollData() {
 
-    //Attributes charges
-    system.attributes.body.charges.max = Math.floor((system.attributes.body.value + system.attributes.body.base) / 3.0)
-    system.attributes.dexterity.charges.max = Math.floor((system.attributes.dexterity.value + system.attributes.dexterity.base) / 3.0)
-    system.attributes.awareness.charges.max = Math.floor((system.attributes.awareness.value + system.attributes.awareness.base) / 3.0)
-    system.attributes.intelligenze.charges.max = Math.floor((system.attributes.intelligenze.value + system.attributes.intelligenze.base) / 3.0)
-    system.attributes.charisma.charges.max = Math.floor((system.attributes.charisma.value + system.attributes.charisma.base) / 3.0)
+    // Copy the actor's system data
+    const data = this.toObject(false).system;
+    const shorthand = game.settings.get("worldbuilding", "macroShorthand");
+    const formulaAttributes = [];
+    const itemAttributes = [];
 
-    //Skill Points used
-    system.skillsShop.used = system.skills.stamina.value + system.skills.atletik.value + system.skills.intimidateB.value + system.skills.strength.value + system.skills.toughness.value + system.skills.acrobatic.value + system.skills.sleightOfHand.value + system.skills.infiltration.value + system.skills.intuition.value + system.skills.investigation.value + system.skills.perception.value + system.skills.willpower.value + system.skills.generalEducation.value + system.skills.culturalEducation.value + system.skills.technikEducation.value + system.skills.medizinEducation.value + system.skills.pokemonEducation.value + system.skills.nature.value + system.skills.occultEductaion.value + system.skills.leadership.value + system.skills.performance.value + system.skills.intimadateC.value + system.skills.deception.value +system.skills.persuation.value
+    // Handle formula attributes when the short syntax is disabled.
+    this._applyShorthand(data, formulaAttributes, shorthand);
 
-    //Attribute Points used
-    system.attributesShop.used = system.attributes.body.value + system.attributes.dexterity.value + system.attributes.awareness.value + system.attributes.intelligenze.value + system.attributes.charisma.value
+    // Map all item data using their slugified names
+    this._applyItems(data, itemAttributes, shorthand);
 
-  //}
+    // Evaluate formula replacements on items.
+    this._applyItemsFormulaReplacements(data, itemAttributes, shorthand);
+
+    // Evaluate formula attributes after all other attributes have been handled, including items.
+    this._applyFormulaReplacements(data, formulaAttributes, shorthand);
+
+    // Remove the attributes if necessary.
+    if ( !!shorthand ) {
+      delete data.attributes;
+      delete data.attr;
+      delete data.groups;
+    }
+    return data;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Apply shorthand syntax to actor roll data.
+   * @param {Object} data The actor's data object.
+   * @param {Array} formulaAttributes Array of attributes that are derived formulas.
+   * @param {Boolean} shorthand Whether or not the shorthand syntax is used.
+   */
+  _applyShorthand(data, formulaAttributes, shorthand) {
+    // Handle formula attributes when the short syntax is disabled.
+    for ( let [k, v] of Object.entries(data.attributes || {}) ) {
+      // Make an array of formula attributes for later reference.
+      if ( v.dtype === "Formula" ) formulaAttributes.push(k);
+      // Add shortened version of the attributes.
+      if ( !!shorthand ) {
+        if ( !(k in data) ) {
+          // Non-grouped attributes.
+          if ( v.dtype ) {
+            data[k] = v.value;
+          }
+          // Grouped attributes.
+          else {
+            data[k] = {};
+            for ( let [gk, gv] of Object.entries(v) ) {
+              data[k][gk] = gv.value;
+              if ( gv.dtype === "Formula" ) formulaAttributes.push(`${k}.${gk}`);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Add items to the actor roll data object. Handles regular and shorthand
+   * syntax, and calculates derived formula attributes on the items.
+   * @param {Object} data The actor's data object.
+   * @param {string[]} itemAttributes
+   * @param {Boolean} shorthand Whether or not the shorthand syntax is used.
+   */
+  _applyItems(data, itemAttributes, shorthand) {
+    // Map all items data using their slugified names
+    data.items = this.items.reduce((obj, item) => {
+      const key = item.name.slugify({strict: true});
+      const itemData = item.toObject(false).system;
+
+      // Add items to shorthand and note which ones are formula attributes.
+      for ( let [k, v] of Object.entries(itemData.attributes) ) {
+        // When building the attribute list, prepend the item name for later use.
+        if ( v.dtype === "Formula" ) itemAttributes.push(`${key}..${k}`);
+        // Add shortened version of the attributes.
+        if ( !!shorthand ) {
+          if ( !(k in itemData) ) {
+            // Non-grouped item attributes.
+            if ( v.dtype ) {
+              itemData[k] = v.value;
+            }
+            // Grouped item attributes.
+            else {
+              if ( !itemData[k] ) itemData[k] = {};
+              for ( let [gk, gv] of Object.entries(v) ) {
+                itemData[k][gk] = gv.value;
+                if ( gv.dtype === "Formula" ) itemAttributes.push(`${key}..${k}.${gk}`);
+              }
+            }
+          }
+        }
+        // Handle non-shorthand version of grouped attributes.
+        else {
+          if ( !v.dtype ) {
+            if ( !itemData[k] ) itemData[k] = {};
+            for ( let [gk, gv] of Object.entries(v) ) {
+              itemData[k][gk] = gv.value;
+              if ( gv.dtype === "Formula" ) itemAttributes.push(`${key}..${k}.${gk}`);
+            }
+          }
+        }
+      }
+
+      // Delete the original attributes key if using the shorthand syntax.
+      if ( !!shorthand ) {
+        delete itemData.attributes;
+      }
+      obj[key] = itemData;
+      return obj;
+    }, {});
+  }
+
+  /* -------------------------------------------- */
+
+  _applyItemsFormulaReplacements(data, itemAttributes, shorthand) {
+    for ( let k of itemAttributes ) {
+      // Get the item name and separate the key.
+      let item = null;
+      let itemKey = k.split('..');
+      item = itemKey[0];
+      k = itemKey[1];
+
+      // Handle group keys.
+      let gk = null;
+      if ( k.includes('.') ) {
+        let attrKey = k.split('.');
+        k = attrKey[0];
+        gk = attrKey[1];
+      }
+
+      let formula = '';
+      if ( !!shorthand ) {
+        // Handle grouped attributes first.
+        if ( data.items[item][k][gk] ) {
+          formula = data.items[item][k][gk].replace('@item.', `@items.${item}.`);
+          data.items[item][k][gk] = Roll.replaceFormulaData(formula, data);
+        }
+        // Handle non-grouped attributes.
+        else if ( data.items[item][k] ) {
+          formula = data.items[item][k].replace('@item.', `@items.${item}.`);
+          data.items[item][k] = Roll.replaceFormulaData(formula, data);
+        }
+      }
+      else {
+        // Handle grouped attributes first.
+        if ( data.items[item]['attributes'][k][gk] ) {
+          formula = data.items[item]['attributes'][k][gk]['value'].replace('@item.', `@items.${item}.attributes.`);
+          data.items[item]['attributes'][k][gk]['value'] = Roll.replaceFormulaData(formula, data);
+        }
+        // Handle non-grouped attributes.
+        else if ( data.items[item]['attributes'][k]['value'] ) {
+          formula = data.items[item]['attributes'][k]['value'].replace('@item.', `@items.${item}.attributes.`);
+          data.items[item]['attributes'][k]['value'] = Roll.replaceFormulaData(formula, data);
+        }
+      }
+    }
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Apply replacements for derived formula attributes.
+   * @param {Object} data The actor's data object.
+   * @param {Array} formulaAttributes Array of attributes that are derived formulas.
+   * @param {Boolean} shorthand Whether or not the shorthand syntax is used.
+   */
+  _applyFormulaReplacements(data, formulaAttributes, shorthand) {
+    // Evaluate formula attributes after all other attributes have been handled, including items.
+    for ( let k of formulaAttributes ) {
+      // Grouped attributes are included as `group.attr`, so we need to split them into new keys.
+      let attr = null;
+      if ( k.includes('.') ) {
+        let attrKey = k.split('.');
+        k = attrKey[0];
+        attr = attrKey[1];
+      }
+      // Non-grouped attributes.
+      if ( data.attributes[k]?.value ) {
+        data.attributes[k].value = Roll.replaceFormulaData(String(data.attributes[k].value), data);
+      }
+      // Grouped attributes.
+      else if ( attr ) {
+        data.attributes[k][attr].value = Roll.replaceFormulaData(String(data.attributes[k][attr].value), data);
+      }
+
+      // Duplicate values to shorthand.
+      if ( !!shorthand ) {
+        // Non-grouped attributes.
+        if ( data.attributes[k]?.value ) {
+          data[k] = data.attributes[k].value;
+        }
+        // Grouped attributes.
+        else {
+          if ( attr ) {
+            // Initialize a group key in case it doesn't exist.
+            if ( !data[k] ) {
+              data[k] = {};
+            }
+            data[k][attr] = data.attributes[k][attr].value;
+          }
+        }
+      }
+    }
+  }
+
+  /* -------------------------------------------- */
+
+  /** @inheritdoc */
+  async modifyTokenAttribute(attribute, value, isDelta = false, isBar = true) {
+    const current = foundry.utils.getProperty(this.system, attribute);
+    if ( !isBar || !isDelta || (current?.dtype !== "Resource") ) {
+      return super.modifyTokenAttribute(attribute, value, isDelta, isBar);
+    }
+    const updates = {[`system.${attribute}.value`]: Math.clamped(current.value + value, current.min, current.max)};
+    const allowed = Hooks.call("modifyTokenAttribute", {attribute, value, isDelta, isBar}, updates);
+    return allowed !== false ? this.update(updates) : this;
   }
 }

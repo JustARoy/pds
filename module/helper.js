@@ -172,7 +172,7 @@ export class EntitySheetHelper {
     const button = event.currentTarget;
     const label = button.closest(".attribute").querySelector(".attribute-label")?.value;
     const chatLabel = label ?? button.parentElement.querySelector(".attribute-key").value;
-    const shorthand = game.settings.get("pds", "macroShorthand");
+    const shorthand = game.settings.get("worldbuilding", "macroShorthand");
 
     // Use the actor for rollData so that formulas are always in reference to the parent actor.
     const rollData = this.actor.getRollData();
@@ -184,63 +184,6 @@ export class EntitySheetHelper {
       if ( formula.includes('@item.') && this.item ) {
         let itemName = this.item.name.slugify({strict: true}); // Get the machine safe version of the item name.
         replacement = !!shorthand ? `@items.${itemName}.` : `@items.${itemName}.attributes.`;
-        formula = formula.replace('@item.', replacement);
-      }
-
-      // Create the roll and the corresponding message
-      let r = new Roll(formula, rollData);
-      return r.toMessage({
-        user: game.user.id,
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: `${chatLabel}`
-      });
-    }
-  }
-
-  
-  static onSkillRollNew(event) {
-    event.preventDefault();
-    const button = event.currentTarget;
-    const label = button.closest(".skills").querySelector(".skill-label")?.value;
-    const chatLabel = label ?? button.parentElement.querySelector(".skills-skil").value;
-    const shorthand = game.settings.get("pds", "macroShorthand");
-
-    // Use the actor for rollData so that formulas are always in reference to the parent actor.
-    const rollData = this.actor.getRollData();
-    let formula = "1d100"
-
-    // Create the roll and the corresponding message
-    let r = new Roll(formula, rollData);
-    return r.toMessage({
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `${chatLabel}`
-    });
-  }
-
-
-
-  /**
-   * Listen for the roll button on attributes.
-   * @param {MouseEvent} event    The originating left click event
-   */
-  static onSkillRoll(event) {
-    event.preventDefault();
-    const button = event.currentTarget;
-    const label = button.closest(".skill").querySelector(".skill-label")?.value;
-    const chatLabel = label ?? button.parentElement.querySelector(".skill-key").value;
-    const shorthand = game.settings.get("pds", "macroShorthand");
-
-    // Use the actor for rollData so that formulas are always in reference to the parent actor.
-    const rollData = this.actor.getRollData();
-    let formula = button.closest(".skill").querySelector(".skill-value")?.value;
-
-    // If there's a formula, attempt to roll it.
-    if ( formula ) {
-      let replacement = null;
-      if ( formula.includes('@item.') && this.item ) {
-        let itemName = this.item.name.slugify({strict: true}); // Get the machine safe version of the item name.
-        replacement = !!shorthand ? `@items.${itemName}.` : `@items.${itemName}.skills.`;
         formula = formula.replace('@item.', replacement);
       }
 
@@ -472,18 +415,53 @@ export class EntitySheetHelper {
    * @returns {object}              The updated formData object.
    */
   static updateAttributes(formData, document) {
+    let groupKeys = [];
 
     // Handle the free-form attributes list
     const formAttrs = foundry.utils.expandObject(formData)?.system?.attributes || {};
     const attributes = Object.values(formAttrs).reduce((obj, v) => {
       let attrs = [];
+      let group = null;
+      // Handle attribute keys for grouped attributes.
+      if ( !v["key"] ) {
+        attrs = Object.keys(v);
+        attrs.forEach(attrKey => {
+          group = v[attrKey]['group'];
+          groupKeys.push(group);
+          let attr = v[attrKey];
+          const k = this.cleanKey(v[attrKey]["key"] ? v[attrKey]["key"].trim() : attrKey.trim());
+          delete attr["key"];
+          // Add the new attribute if it's grouped, but we need to build the nested structure first.
+          if ( !obj[group] ) {
+            obj[group] = {};
+          }
+          obj[group][k] = attr;
+        });
+      }
       // Handle attribute keys for ungrouped attributes.
+      else {
+        const k = this.cleanKey(v["key"].trim());
+        delete v["key"];
+        // Add the new attribute only if it's ungrouped.
+        if ( !group ) {
+          obj[k] = v;
+        }
+      }
       return obj;
     }, {});
 
     // Remove attributes which are no longer used
     for ( let k of Object.keys(document.system.attributes) ) {
       if ( !attributes.hasOwnProperty(k) ) attributes[`-=${k}`] = null;
+    }
+
+    // Remove grouped attributes which are no longer used.
+    for ( let group of groupKeys) {
+      if ( document.system.attributes[group] ) {
+        for ( let k of Object.keys(document.system.attributes[group]) ) {
+          if ( !attributes[group].hasOwnProperty(k) ) attributes[group][`-=${k}`] = null;
+        }
+      }
     }
 
     // Re-combine formData
@@ -494,7 +472,41 @@ export class EntitySheetHelper {
 
     return formData;
   }
-  
+
+  /* -------------------------------------------- */
+
+  /**
+   * Update attribute groups when updating an actor object.
+   * @param {object} formData       The form data object to modify keys and values for.
+   * @param {Document} document     The Actor or Item document within which attributes are being updated
+   * @returns {object}              The updated formData object.
+   */
+  static updateGroups(formData, document) {
+    const formGroups = foundry.utils.expandObject(formData).system.groups || {};
+    const documentGroups = Object.keys(document.system.groups || {});
+
+    // Identify valid groups submitted on the form
+    const groups = Object.entries(formGroups).reduce((obj, [k, v]) => {
+      const validGroup = documentGroups.includes(k) || this.validateGroup(k, document);
+      if ( validGroup )  obj[k] = v;
+      return obj;
+    }, {});
+
+    // Remove groups which are no longer used
+    for ( let k of Object.keys(document.system.groups)) {
+      if ( !groups.hasOwnProperty(k) ) groups[`-=${k}`] = null;
+    }
+
+    // Re-combine formData
+    formData = Object.entries(formData).filter(e => !e[0].startsWith("system.groups")).reduce((obj, e) => {
+      obj[e[0]] = e[1];
+      return obj;
+    }, {_id: document.id, "system.groups": groups});
+    return formData;
+  }
+
+  /* -------------------------------------------- */
+
   /**
    * @see ClientDocumentMixin.createDialog
    */
@@ -508,7 +520,7 @@ export class EntitySheetHelper {
 
     // Identify the template Actor types
     const collection = game.collections.get(this.documentName);
-    const templates = collection.filter(a => a.getFlag("pds", "isTemplate"));
+    const templates = collection.filter(a => a.getFlag("worldbuilding", "isTemplate"));
     const defaultType = this.TYPES.filter(t => t !== CONST.BASE_DOCUMENT_TYPE)[0] ?? CONST.BASE_DOCUMENT_TYPE;
     const types = {
       [defaultType]: game.i18n.localize("SIMPLE.NoTemplate")
@@ -546,7 +558,7 @@ export class EntitySheetHelper {
         if ( template ) {
           createData = foundry.utils.mergeObject(template.toObject(), createData);
           createData.type = template.type;
-          delete createData.flags.pds.isTemplate;
+          delete createData.flags.worldbuilding.isTemplate;
         }
 
         // Merge provided override data
@@ -587,35 +599,4 @@ export class EntitySheetHelper {
     if ( clean !== key ) ui.notifications.error("SIMPLE.NotifyAttrInvalid", { localize: true });
     return clean;
   }
-  
-  /**
-   * Update attribute groups when updating an actor object.
-   * @param {object} formData       The form data object to modify keys and values for.
-   * @param {Document} document     The Actor or Item document within which attributes are being updated
-   * @returns {object}              The updated formData object.
-   */
-  static updateGroups(formData, document) {
-    const formGroups = foundry.utils.expandObject(formData).system.groups || {};
-    const documentGroups = Object.keys(document.system.groups || {});
-
-    // Identify valid groups submitted on the form
-    const groups = Object.entries(formGroups).reduce((obj, [k, v]) => {
-      const validGroup = documentGroups.includes(k) || this.validateGroup(k, document);
-      if ( validGroup )  obj[k] = v;
-      return obj;
-    }, {});
-
-    // Remove groups which are no longer used
-    for ( let k of Object.keys(document.system.groups)) {
-      if ( !groups.hasOwnProperty(k) ) groups[`-=${k}`] = null;
-    }
-
-    // Re-combine formData
-    formData = Object.entries(formData).filter(e => !e[0].startsWith("system.groups")).reduce((obj, e) => {
-      obj[e[0]] = e[1];
-      return obj;
-    }, {_id: document.id, "system.groups": groups});
-    return formData;
-  }
-
 }

@@ -9,9 +9,8 @@ import { SimpleItem } from "./item.js";
 import { SimpleItemSheet } from "./item-sheet.js";
 import { SimpleActorSheet } from "./actor-sheet.js";
 import { preloadHandlebarsTemplates } from "./templates.js";
-import { createpdsMacro } from "./macro.js";
+import { createWorldbuildingMacro } from "./macro.js";
 import { SimpleToken, SimpleTokenDocument } from "./token.js";
-import { PDSItemSheet } from "./module/sheet/PDSItemSheet.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -21,20 +20,20 @@ import { PDSItemSheet } from "./module/sheet/PDSItemSheet.js";
  * Init hook.
  */
 Hooks.once("init", async function() {
-  console.log(`Initializing Simple pds System`);
+  console.log(`Initializing Simple Worldbuilding System`);
 
   /**
    * Set an initiative formula for the system. This will be updated later.
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: "1d100",
-    decimals: 3
+    formula: "1d20",
+    decimals: 2
   };
 
-  game.pds = {
+  game.worldbuilding = {
     SimpleActor,
-    createpdsMacro
+    createWorldbuildingMacro
   };
 
   // Define custom Document classes
@@ -45,13 +44,12 @@ Hooks.once("init", async function() {
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
-  Actors.registerSheet("pds", SimpleActorSheet, { makeDefault: true });
+  Actors.registerSheet("worldbuilding", SimpleActorSheet, { makeDefault: true });
   Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("pds", PDSItemSheet, { makeDefault: true });
-  Items.registerSheet("pds", SimpleItemSheet);
+  Items.registerSheet("worldbuilding", SimpleItemSheet, { makeDefault: true });
 
   // Register system settings
-  game.settings.register("pds", "macroShorthand", {
+  game.settings.register("worldbuilding", "macroShorthand", {
     name: "SETTINGS.SimpleMacroShorthandN",
     hint: "SETTINGS.SimpleMacroShorthandL",
     scope: "world",
@@ -61,18 +59,18 @@ Hooks.once("init", async function() {
   });
 
   // Register initiative setting.
-  game.settings.register("pds", "initFormula", {
+  game.settings.register("worldbuilding", "initFormula", {
     name: "SETTINGS.SimpleInitFormulaN",
     hint: "SETTINGS.SimpleInitFormulaL",
     scope: "world",
     type: String,
-    default: "1d100",
+    default: "1d20",
     config: true,
     onChange: formula => _simpleUpdateInit(formula, true)
   });
 
   // Retrieve and assign the initiative formula setting.
-  const initFormula = game.settings.get("pds", "initFormula");
+  const initFormula = game.settings.get("worldbuilding", "initFormula");
   _simpleUpdateInit(initFormula);
 
   /**
@@ -103,7 +101,7 @@ Hooks.once("init", async function() {
 /**
  * Macrobar hook.
  */
-Hooks.on("hotbarDrop", (bar, data, slot) => createpdsMacro(data, slot));
+Hooks.on("hotbarDrop", (bar, data, slot) => createWorldbuildingMacro(data, slot));
 
 /**
  * Adds the actor template context menu.
@@ -120,7 +118,7 @@ Hooks.on("getActorDirectoryEntryContext", (html, options) => {
     },
     callback: li => {
       const actor = game.actors.get(li.data("documentId"));
-      actor.setFlag("pds", "isTemplate", true);
+      actor.setFlag("worldbuilding", "isTemplate", true);
     }
   });
 
@@ -134,7 +132,7 @@ Hooks.on("getActorDirectoryEntryContext", (html, options) => {
     },
     callback: li => {
       const actor = game.actors.get(li.data("documentId"));
-      actor.setFlag("pds", "isTemplate", false);
+      actor.setFlag("worldbuilding", "isTemplate", false);
     }
   });
 });
@@ -154,7 +152,7 @@ Hooks.on("getItemDirectoryEntryContext", (html, options) => {
     },
     callback: li => {
       const item = game.items.get(li.data("documentId"));
-      item.setFlag("pds", "isTemplate", true);
+      item.setFlag("worldbuilding", "isTemplate", true);
     }
   });
 
@@ -168,7 +166,7 @@ Hooks.on("getItemDirectoryEntryContext", (html, options) => {
     },
     callback: li => {
       const item = game.items.get(li.data("documentId"));
-      item.setFlag("pds", "isTemplate", false);
+      item.setFlag("worldbuilding", "isTemplate", false);
     }
   });
 });
