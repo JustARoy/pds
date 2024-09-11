@@ -25,7 +25,6 @@ export class SimpleActorSheet extends ActorSheet {
   /** @inheritdoc */
   async getData(options) {
     const context = await super.getData(options);
-    EntitySheetHelper.getAttributeData(context.data);
     context.shorthand = !!game.settings.get("pds", "macroShorthand");
     context.systemData = context.data.system;
     context.dtypes = ATTRIBUTE_TYPES;
@@ -40,19 +39,34 @@ export class SimpleActorSheet extends ActorSheet {
 
   /** @inheritdoc */
   activateListeners(html) {
+    
     super.activateListeners(html);
+
+    if(this.actor.owner){
+      html.find(".item-roll").click(this._onItemRoll.bind(this));
+    }
 
     // Everything below here is only needed if the sheet is editable
     if ( !this.isEditable ) return;
 
     // Attribute Management
-    html.find(".attributes").on("click", ".attribute-control", EntitySheetHelper.onClickAttributeControl.bind(this));
-    html.find(".groups").on("click", ".group-control", EntitySheetHelper.onClickAttributeGroupControl.bind(this));
-    html.find(".attributes").on("click", "a.attribute-roll", EntitySheetHelper.onAttributeRoll.bind(this));
+    //html.find(".skills").on("click", "a.skills-roll", EntitySheetHelper.onSkillRoll.bind(this));
 
     // Item Controls
     html.find(".item-control").click(this._onItemControl.bind(this));
     html.find(".items .rollable").on("click", this._onItemRoll.bind(this));
+
+    //Rollable abilities
+    html.on('click', '.rollable', this._onRoll.bind(this));
+    html.on('click', '.dmg-roll', this._onRollDmg.bind(this));
+    html.on('click', '.armor-roll', this._onRollArmor.bind(this));
+
+    //Actor Controls
+    if(this.actor.owner){
+      html.find(".item-roll").click(this._onItemRoll.bind(this));
+      html.find(".task-check").click(this._onTaskCheck.bind(this));
+      html.find(".skill-roll").click(EntitySheetHelper.onSkillRollNew.bind(this));
+    }
 
     // Add draggable for Macro creation
     html.find(".attributes a.attribute-roll").each((i, a) => {
@@ -62,6 +76,57 @@ export class SimpleActorSheet extends ActorSheet {
         ev.dataTransfer.setData('text/plain', JSON.stringify(dragData));
       }, false);
     });
+  }
+
+  async _onRollArmor(event){
+    let roll = await new Roll('1d6').evaluate({async : true})
+    await roll.toMessage()
+    return
+  }
+  
+  async _onRollDmg(event) {
+    let i = 0;
+    let dice = 2;
+    let total_rolls = 0;
+    let total_damage = 0;
+    let rolls = []
+
+    while(i < dice){
+      let result = await new Roll('1d6').evaluate();
+
+      if(result._total == 6){
+        i--;
+      }
+      i++;
+      total_damage += result._total;
+      total_rolls += 1;
+      rolls.push(result._total)
+    }
+    
+    let message = 'Gesamtschaden:' + total_damage.toString() + '\r\n' + 'Würfelanzahl:' + total_rolls.toString();
+  ChatMessage.create({
+  content: message
+})
+    
+    return
+  }
+
+  async _onSkillRoll(event){
+    event.preventDefault();
+    const skill = event.currentTarget.dataset.skill;
+    await "1d6".roll()
+  }
+
+  _onTaskCheck(event){
+    const itemID = event.currentTarget.closest(".item").dataset.itemId;
+    const item = this.actor.getOwnedItem(itemID);
+    let rollFormula = "1d100";
+    let rollData;
+
+    let messageData ={
+      speaker: ChatMessage.getSpeaker()
+    }
+    new Roll(rollFormula, rollData).toMessage(messageData);
   }
 
   /* -------------------------------------------- */
@@ -97,17 +162,44 @@ export class SimpleActorSheet extends ActorSheet {
    * Listen for roll buttons on items.
    * @param {MouseEvent} event    The originating left click event
    */
-  _onItemRoll(event) {
-    let button = $(event.currentTarget);
-    const li = button.parents(".item");
-    const item = this.actor.items.get(li.data("itemId"));
-    let r = new Roll(button.data('roll'), this.actor.getRollData());
-    return r.toMessage({
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `<h2>${item.name}</h2><h3>${button.text()}</h3>`
-    });
+ _onItemRoll(event) {
+   let button = $(event.currentTarget);
+   const li = button.parents(".item");
+   const item = this.actor.items.get(li.data("itemId"));
+   let r = new Roll(button.data('roll'), this.actor.getRollData());
+   return r.toMessage({
+     user: game.user.id,
+     speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+     flavor: `<h2>${item.name}</h2><h3>${button.text()}</h3>`
+   });
+ }
+
+_onRoll(event) {
+  event.preventDefault();
+  const element = event.currentTarget;
+  const dataset = element.dataset;
+
+  // Handle item rolls.
+  if (dataset.rollType) {
+    if (dataset.rollType == 'item') {
+      const itemId = element.closest('.item').dataset.itemId;
+      const item = this.actor.items.get(itemId);
+      if (item) return item.roll();
+    }
   }
+
+  // Handle rolls that supply the formula directly.
+  if (dataset.roll) {
+    let label = dataset.label ? `[ability] ${dataset.label}` : '';
+    let roll = new Roll(dataset.roll, this.actor.getRollData());
+    roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: label,
+      rollMode: game.settings.get('core', 'rollMode'),
+    });
+    return roll;
+  }
+}
 
   /* -------------------------------------------- */
 
@@ -115,7 +207,6 @@ export class SimpleActorSheet extends ActorSheet {
   _getSubmitData(updateData) {
     let formData = super._getSubmitData(updateData);
     formData = EntitySheetHelper.updateAttributes(formData, this.object);
-    formData = EntitySheetHelper.updateGroups(formData, this.object);
     return formData;
   }
 }

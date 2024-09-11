@@ -1,1 +1,2 @@
 export const ATTRIBUTE_TYPES = ["String", "Number", "Boolean", "Formula", "Resource"];
+export const ELEMENT_TYPES = ["Normal","Fire","Water","Elektro","Grass","Flying","Bug","Poison","Rock","Ground","Fighting","Ice","Psychic","Ghost","Dragon","Dark","Steel","Fairy"];
