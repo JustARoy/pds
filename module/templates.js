@@ -8,8 +8,8 @@ export const preloadHandlebarsTemplates = async function() {
   // Define template paths to load
   const templatePaths = [
     // Attribute list partial.
-    "systems/worldbuilding/templates/parts/sheet-attributes.html",
-    "systems/worldbuilding/templates/parts/sheet-groups.html"
+    "systems/pds/templates/parts/sheet-attributes.hbs",
+    "systems/pds/templates/parts/sheet-groups.hbs"
   ];
 
   // Load the template parts

@@ -1,16 +1,11 @@
+
 {
-  "id": "worldbuilding",
-  "version": "0.8.2",
-  "title": "Simple World-Building",
-  "url": "https://github.com/foundryvtt/worldbuilding/",
-  "description": "A minimalist game system which provides configurable Actor and Item templates to support free-form system agnostic game-play.",
-  "license": "LICENSE.txt",
-  "authors": [
-    {
-      "name": "Atropos",
-      "url": "https://foundryvtt.com"
-    }
-  ],
+  "id": "pds",
+  "name": "pds",
+  "title": "Pokemon Dark Shadows",
+  "description": "A System for playing Pokemon Dark Shadows",
+  "author": "Tim Eickenroth",
+  "version": 0.01,
   "esmodules": ["module/simple.js"],
   "styles": ["styles/simple.css"],
   "packs": [],
@@ -21,19 +16,21 @@
       "path": "lang/en.json"
     },
     {
-      "lang": "pl",
-      "name": "Polski",
-      "path": "lang/pl.json"
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
     }
   ],
   "compatibility": {
-    "minimum": "11",
-    "verified": "11"
+    "minimum": "10",
+    "verified": "11",
+    "maximum": "11"
   },
-  "gridDistance": 5,
-  "gridUnits": "ft",
+  "gridDistance": 1,
+  "gridUnits": "m",
   "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power",
-  "manifest": "https://raw.githubusercontent.com/foundryvtt/worldbuilding/master/system.json",
-  "download": "https://github.com/foundryvtt/worldbuilding/archive/refs/tags/release-082.zip"
+  "secondaryTokenAttribute": "stress",
+  "initiative": "1d100",
+  "manifest": "https://github.com/JustARoy/pds/blob/main/system.json",
+  "download": "https://github.com/JustARoy/pds/archive/refs/heads/main.zip"
 }
