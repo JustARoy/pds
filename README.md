@@ -1,3 +1,4 @@
-# Simple Worldbuilding System
+# Pokemon Dark Shadows
 
-A simple game system for Foundry VTT which allows for flexible definition of Actors and Items to assist with worldbuilding or for running games which do not have a more complete system implementation available.
+Ein Foundry System spezifisch für Pokemon Mystery Dungeon Settings.
+Das System stellt freiheit und Erzählungen vor Mechaniken und ist daher besonders für Westmarch geeignet, da es keine zu großen mechanischen schritte zwischen den Charakter Stufen 1 und 15 gibt.
