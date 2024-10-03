@@ -6,8 +6,8 @@
 // Import Modules
 import { SimpleActor } from "./actor.js";
 import { SimpleItem } from "./item.js";
-import { SimpleItemSheet } from "./item-sheet.js";
-import { SimpleActorSheet } from "./actor-sheet.js";
+import { SimpleItemSheet } from "./sheets/item-sheet.js";
+import { SimpleActorSheet } from "./sheets/actor-sheet.js";
 import { preloadHandlebarsTemplates } from "./templates.js";
 import { createpdsMacro } from "./macro.js";
 import { SimpleToken, SimpleTokenDocument } from "./token.js";

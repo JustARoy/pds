@@ -6,6 +6,10 @@ import {EntitySheetHelper} from "./helper.js";
  */
 export class SimpleItem extends Item {
 
+  chatTemplate ={
+    //List of Chat Templates
+  }
+  
   /** @inheritdoc */
   prepareDerivedData() {
     super.prepareDerivedData();

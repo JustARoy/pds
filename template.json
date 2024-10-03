@@ -3,6 +3,7 @@
     "types": ["character"],
     "htmlFields": ["biography"],
     "character": {
+      "name": "",
       "level": 1,
       "xp": 180,
       "biography": "",
@@ -100,8 +101,17 @@
         "bought": 0,
         "startValue": 20
       },
+      "race":{
+        "name": "",
+        "type1": "",
+        "type2": "",
+        "feat1": "",
+        "feat2": "",
+        "feat3": ""
+      },
       "attributes": {
         "body": {
+          "value": 0,
           "bought": 0,
           "base": 0,
           "label": "Body",
@@ -408,11 +418,12 @@
     }
   },
   "Item": {
-    "types": ["item","attack"],
-    "htmlFields": ["description"],
-    "item": {
+    "types": ["item","artefakt","attack","log_entry"],
+    "templates": {
       "name": "",
-      "description": "",
+      "description": ""
+    },
+    "item": {
       "chargescurrent": 0,
       "chargesmax": 1,
       "rarety": 0,
@@ -420,12 +431,31 @@
         "name": "",
         "description": "",
         "costs": ""
-      }
+      },
+      "artefakt": {
+        "chargescurrent": 0,
+        "chargesmax": 1,
+        "abilities": {
+          "name": "",
+          "description": ""
+        },
+        "lockedabilities":{
+          "name": "",
+          "description": "",
+          "unlockedby": ""
+        }
     },
     "attack":{
-      "name": "",
+      "level": 0,
       "type": "",
-      "description": ""
+      "enhancements": []
+    },
+    "log_entry": {
+      "date": "",
+      "dm": "",
+      "xp": 0,
+      "rewards": ""
     }
+  }
   }
 }
