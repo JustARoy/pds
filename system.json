@@ -4,7 +4,7 @@
   "name": "pds",
   "title": "Pokemon Dark Shadows",
   "description": "A System for playing Pokemon Dark Shadows",
-  "version": 0.01,
+  "version": 0.02,
   "esmodules": ["module/simple.js"],
   "styles": ["styles/simple.css"],
   "packs": [],
